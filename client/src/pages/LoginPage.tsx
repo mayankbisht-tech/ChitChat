@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import assets from '../assets/assets'
+import { AuthContext } from '../../context/AuthContext'
 
 const LoginPage = () => {
   const [curState,setCurrentState]=useState<"Sign Up" | "Login">("Sign Up")
@@ -8,12 +9,24 @@ const LoginPage = () => {
   const [password,setPassword]=useState<string>("")
   const [bio,setBio]=useState<string>("")
   const [isDataSubmitting,setIsDataSubmitting]=useState<boolean>(false)
+  const authContext = useContext(AuthContext);
+  
+  if (!authContext) {
+    throw new Error("LoginPage must be used within AuthProvider");
+  }
+  
+  const {login} = authContext;
+
   const onSumitHandler=(e:React.FormEvent)=>{
     e.preventDefault();
     if(curState==="Sign Up" && !isDataSubmitting){
       setIsDataSubmitting(true);
       return;
     }
+    const credentials = curState === "Sign Up" 
+      ? { fullName, email, password, bio }
+      : { email, password };
+    login(curState==="Sign Up"?'signup':"login", credentials)
   }
   return (
     <div className='min-h-screen bg-cover bg-center flex items-center justify-center gap-8 sm:justify-evenly max-sm:flex-col backdrop-blur-2xl'>
@@ -23,21 +36,16 @@ const LoginPage = () => {
                 {isDataSubmitting && <img onClick={()=>setIsDataSubmitting(false)} src={assets.arrow_icon} alt="" className='w-5 cursor-pointer' />}
           
         </h2>
-        {curState==="Sign Up" && !isDataSubmitting && (
-        
-        <input onChange={(e)=>setFullName(e.target.value)} value={fullName} type="text" placeholder='Full Name' className=' border border-gray-500 rounded-md p-2 focus:outline-none ' required />
-        )}
-        {!isDataSubmitting && (
-          <>
-          <input onChange={(e)=>setEmail(e.target.value)} type="email" value={email} placeholder='Email' className=' p-2 border border-gray-500 rounded-md focus:outline-none focus-ring-2 focus:ring-indigo-500'  required />
-          <input onChange={(e)=>setPassword(e.target.value)} type="password" value={password} placeholder='Password' className=' p-2 border border-gray-500 rounded-md focus:outline-none focus-ring-2 focus:ring-indigo-500'  required />
-          </>
-        )}
-        {
-          curState==="Sign Up" && isDataSubmitting && (
-            <textarea onChange={(e)=>setBio(e.target.value)} value={bio} placeholder='provide a short bio' rows={4} className=' p-2 border border-gray-500 rounded-md focus:outline-none focus-ring-2 focus:ring-indigo-500' required  />
-          )
-        }
+        <div className={curState==="Sign Up" && !isDataSubmitting ? '' : 'hidden'}>
+          <input onChange={(e)=>setFullName(e.target.value)} value={fullName} type="text" placeholder='Full Name' className=' border border-gray-500 rounded-md p-2 focus:outline-none w-full' required={curState==="Sign Up" && !isDataSubmitting} />
+        </div>
+        <div className={!isDataSubmitting ? '' : 'hidden'}>
+          <input onChange={(e)=>setEmail(e.target.value)} type="email" value={email} placeholder='Email' className=' p-2 border border-gray-500 rounded-md focus:outline-none focus-ring-2 focus:ring-indigo-500 w-full'  required={!isDataSubmitting} />
+          <input onChange={(e)=>setPassword(e.target.value)} type="password" value={password} placeholder='Password' className=' p-2 border border-gray-500 rounded-md focus:outline-none focus-ring-2 focus:ring-indigo-500 w-full mt-6'  required={!isDataSubmitting} />
+        </div>
+        <div className={curState==="Sign Up" && isDataSubmitting ? '' : 'hidden'}>
+          <textarea onChange={(e)=>setBio(e.target.value)} value={bio} placeholder='provide a short bio' rows={4} className=' p-2 border border-gray-500 rounded-md focus:outline-none focus-ring-2 focus:ring-indigo-500 w-full' required={curState==="Sign Up" && isDataSubmitting}  />
+        </div>
         <button className='py-3 bg-gradient-to-r from-purple-400 to-violet-600 text-white rounded-md cursor-pointer'>
           {curState==="Sign Up" ? "Create Account"  : "Login Now"}
         </button>

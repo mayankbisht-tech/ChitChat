@@ -1,64 +1,73 @@
 import cloudinary from "../lib/cloudinary";
 import Message from "../models/Message";
 import User from "../models/User";
-
-export const getUserForSidebar=async(req,res)=>{
+import {io,userSocketMap} from "../server"
+export const getUserForSidebar=async(req: any, res: any)=>{
     try {
         const userId=req.user._id;
         const filteredUsers=await User.find({_id:{$ne:userId}}).select("-password")
-        const unseenMessages={};
+        const unseenMessages: Record<string, number> = {};
         const promises=filteredUsers.map(async(user)=>{
-            const messages=await Message.find({senderId:user._id,reciverId:userId,seen:false})
-            if(Message.length>0){
+            const messages=await Message.find({senderId:user._id,receiverId:userId,seen:false})
+            if(messages.length > 0){
                 unseenMessages[user._id.toString()]=messages.length;
             }
         })
         await Promise.all(promises)
-        res.json({success:true,users:filteredUsers,unseenMessages})
-    } catch (error) {
-        console.log(error.messgae);
-        res.json({success:false,message:error.message})
+        
+        const usersForClient = filteredUsers.map(user => ({
+            _id: user._id,
+            email: user.email,
+            fullName: user.fullName,
+            bio: user.bio,
+            profilePic: user.profilePictureUrl
+        }));
+        
+        res.json({success:true,users:usersForClient,unseenMessages})
+    } catch (error: any) {
+        console.log('getUserForSidebar error:', error.message);
+        res.status(500).json({success:false,message:error.message})
     }
 }
 
-export const getMessages=async(req,res)=>{
+export const getMessages=async(req: any, res: any)=>{
     try {
         const{id:selectedUserId}=req.params;
         const myId=req.user._id;
-        const messgaes=await Message.find({
+        const messages=await Message.find({
             $or:[
-                    {senderId:myId,reciverId:selectedUserId},
-                    {senderId:selectedUserId,reciverId:myId}
+                    {senderId:myId,receiverId:selectedUserId},
+                    {senderId:selectedUserId,receiverId:myId}
                 ]
         })
-        await Message.updateMany({senderId:selectedUserId,reciverId:myId},{seen:true})
-        res.json({success:true,messgaes})
-    } catch (error) {
-        console.log(error.message)
-        res.json({success:false,message:error.message})
+        await Message.updateMany({senderId:selectedUserId,receiverId:myId},{seen:true})
+        res.json({success:true,messages})
+    } catch (error: any) {
+        console.log('getMessages error:', error.message)
+        res.status(500).json({success:false,message:error.message})
     }
 }
 
 
 
 
-export const markMessageAsSeen=async(req,res)=>{
+export const markMessageAsSeen=async(req: any, res: any)=>{
     try {
         const {id}=req.params;
         await Message.findByIdAndUpdate(id,{seen:true})
         res.json({success:true})
-    } catch (error) {
-        console.log(error.message)
-        res.json({success:false,message:error.message})
+    } catch (error: any) {
+        console.log('markMessageAsSeen error:', error.message)
+        res.status(500).json({success:false,message:error.message})
     }
 }
 
 
 
-export const sendMessage=async(req,res)=>{
+export const sendMessage=async(req: any, res: any)=>{
     try {
         const {text,image}=req.body;
-        const reciverId=req.params.id;
+        const receiverId=req.params.id;
         const senderId=req.user._id;
         let imageUrl;
         if(image){
@@ -67,12 +76,17 @@ export const sendMessage=async(req,res)=>{
         }
         const newMessage=await Message.create({
             senderId,
-            reciverId,
-            text,image:imageUrl
+            receiverId,
+            text,
+            image:imageUrl
         })
-        res.json({success:true,newMessage}  )
-    } catch (error) {
-        console.log(error.message)
-        res.json({success:false,message:error.message})
+        const receiverSocketId=userSocketMap[receiverId];
+        if(receiverSocketId){
+            io.to(receiverSocketId).emit("newMessage",newMessage)
+        }
+        res.json({success:true,newMessage})
+    } catch (error: any) {
+        console.log('sendMessage error:', error.message)
+        res.status(500).json({success:false,message:error.message})
     }
 }
