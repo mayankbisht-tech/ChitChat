@@ -1,9 +1,9 @@
-import React, { useContext, useState } from 'react'
-import assets from '../assets/assets'
+import { useContext, useState } from 'react'
+
 import { AuthContext } from '../../context/AuthContext'
 
 const LoginPage = () => {
-  const [curState,setCurrentState]=useState<"Sign Up" | "Login">("Sign Up")
+  const [curState,setCurrentState]=useState<"Sign Up" | "Login">("Login")
   const [fullName,setFullName]=useState<string>("")
   const [email,setEmail]=useState<string>("")
   const [password,setPassword]=useState<string>("")
@@ -28,40 +28,149 @@ const LoginPage = () => {
       : { email, password };
     login(curState==="Sign Up"?'signup':"login", credentials)
   }
+  
   return (
-    <div className='min-h-screen bg-cover bg-center flex items-center justify-center gap-8 sm:justify-evenly max-sm:flex-col backdrop-blur-2xl'>
-        <img src={assets.logo_big} alt="" className='w-[min(30vw,250px)]' />
-        <form onSubmit={onSumitHandler} className='border-2 bg-white/8 text-white border-gray-500 p-6 flex flex-col gap-6 rounded-lg shadow-lg '>
-        <h2 className='font-medium text-2xl flex justify-center items-center'>{curState}
-                {isDataSubmitting && <img onClick={()=>setIsDataSubmitting(false)} src={assets.arrow_icon} alt="" className='w-5 cursor-pointer' />}
+    <div className='min-h-screen flex items-center justify-center p-4'>
+      <div className='w-full max-w-6xl grid md:grid-cols-2 gap-8 items-center'>
+        <div className='text-center md:text-left space-y-6 max-md:hidden'>
           
-        </h2>
-        <div className={curState==="Sign Up" && !isDataSubmitting ? '' : 'hidden'}>
-          <input onChange={(e)=>setFullName(e.target.value)} value={fullName} type="text" placeholder='Full Name' className=' border border-gray-500 rounded-md p-2 focus:outline-none w-full' required={curState==="Sign Up" && !isDataSubmitting} />
+          <h1 className='text-5xl font-bold text-white'>
+            Welcome to ChitChat
+          </h1>
+          <p className='text-xl text-gray-400'>Connect with friends and family instantly with video calls and messaging</p>
+          <div className='flex gap-6 justify-center md:justify-start text-gray-400'>
+            <div className='flex items-center gap-3 glass-panel p-4 rounded-xl'>
+              <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
+                <span className='text-2xl'>💬</span>
+              </div>
+              <span>Instant Messaging</span>
+            </div>
+            <div className='flex items-center gap-3 glass-panel p-4 rounded-xl'>
+              <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
+                <span className='text-2xl'>📹</span>
+              </div>
+              <span>Video Calls</span>
+            </div>
+          </div>
         </div>
-        <div className={!isDataSubmitting ? '' : 'hidden'}>
-          <input onChange={(e)=>setEmail(e.target.value)} type="email" value={email} placeholder='Email' className=' p-2 border border-gray-500 rounded-md focus:outline-none focus-ring-2 focus:ring-indigo-500 w-full'  required={!isDataSubmitting} />
-          <input onChange={(e)=>setPassword(e.target.value)} type="password" value={password} placeholder='Password' className=' p-2 border border-gray-500 rounded-md focus:outline-none focus-ring-2 focus:ring-indigo-500 w-full mt-6'  required={!isDataSubmitting} />
+
+        <div className='glass-panel rounded-3xl p-8 md:p-10'>
+          <div className='mb-8'>
+            <h2 className='text-3xl font-bold text-white mb-2'>
+              {curState === "Login" ? "Welcome Back" : "Create Account"}
+            </h2>
+            <p className='text-gray-400'>
+              {curState === "Login" ? "Login to continue your conversations" : "Sign up to get started"}
+            </p>
+          </div>
+
+          <form onSubmit={onSumitHandler} className='space-y-5'>
+            {curState === "Sign Up" && !isDataSubmitting && (
+              <div>
+                <label className='block text-sm font-medium text-gray-400 mb-2'>Full Name</label>
+                <input 
+                  onChange={(e)=>setFullName(e.target.value)} 
+                  value={fullName} 
+                  type="text" 
+                  placeholder='John Doe' 
+                  className='w-full px-4 py-3 glass-input rounded-xl text-white placeholder-gray-500 focus:outline-none transition'
+                  required={curState==="Sign Up" && !isDataSubmitting} 
+                />
+              </div>
+            )}
+
+            {!isDataSubmitting && (
+              <>
+                <div>
+                  <label className='block text-sm font-medium text-gray-400 mb-2'>Email Address</label>
+                  <input 
+                    onChange={(e)=>setEmail(e.target.value)} 
+                    type="email" 
+                    value={email} 
+                    placeholder='you@example.com' 
+                    className='w-full px-4 py-3 glass-input rounded-xl text-white placeholder-gray-500 focus:outline-none transition'
+                    required={!isDataSubmitting} 
+                  />
+                </div>
+                <div>
+                  <label className='block text-sm font-medium text-gray-400 mb-2'>Password</label>
+                  <input 
+                    onChange={(e)=>setPassword(e.target.value)} 
+                    type="password" 
+                    value={password} 
+                    placeholder='••••••••' 
+                    className='w-full px-4 py-3 glass-input rounded-xl text-white placeholder-gray-500 focus:outline-none transition'
+                    required={!isDataSubmitting} 
+                  />
+                </div>
+              </>
+            )}
+
+            {curState === "Sign Up" && isDataSubmitting && (
+              <div>
+                <div className='flex items-center justify-between mb-2'>
+                  <label className='block text-sm font-medium text-gray-400'>Bio</label>
+                  <button 
+                    type="button"
+                    onClick={()=>setIsDataSubmitting(false)} 
+                    className='text-sm text-blue-400 hover:text-blue-300 font-medium'
+                  >
+                    ← Back
+                  </button>
+                </div>
+                <textarea 
+                  onChange={(e)=>setBio(e.target.value)} 
+                  value={bio} 
+                  placeholder='Tell us about yourself...' 
+                  rows={4} 
+                  className='w-full px-4 py-3 glass-input rounded-xl text-white placeholder-gray-500 focus:outline-none transition resize-none'
+                  required={curState==="Sign Up" && isDataSubmitting}  
+                />
+              </div>
+            )}
+
+            <button 
+              type="submit"
+              className='w-full py-3.5 bg-blue-500 hover:bg-blue-600 rounded-xl text-white font-semibold transition'
+            >
+              {curState==="Sign Up" ? (isDataSubmitting ? "Create Account" : "Continue") : "Login"}
+            </button>
+
+            {!isDataSubmitting && (
+              <div className='flex items-center gap-2 text-sm text-gray-400'>
+                <input type="checkbox" className='w-4 h-4 rounded' />
+                <p>I agree to the terms and conditions</p>
+              </div>
+            )}
+
+            <div className='text-center pt-4 border-t border-white/5'>
+              {curState==="Sign Up" ? (
+                <p className='text-sm text-gray-400'>
+                  Already have an account? 
+                  <button 
+                    type="button"
+                    onClick={()=>{setCurrentState("Login"); setIsDataSubmitting(false)}} 
+                    className='font-semibold text-blue-400 hover:text-blue-300 ml-1'
+                  >
+                    Login here
+                  </button>
+                </p>
+              ) : (
+                <p className='text-sm text-gray-400'>
+                  Don't have an account? 
+                  <button 
+                    type="button"
+                    onClick={()=>{setCurrentState("Sign Up"); setIsDataSubmitting(false)}} 
+                    className='font-semibold text-blue-400 hover:text-blue-300 ml-1'
+                  >
+                    Sign up here
+                  </button>
+                </p>
+              )}
+            </div>
+          </form>
         </div>
-        <div className={curState==="Sign Up" && isDataSubmitting ? '' : 'hidden'}>
-          <textarea onChange={(e)=>setBio(e.target.value)} value={bio} placeholder='provide a short bio' rows={4} className=' p-2 border border-gray-500 rounded-md focus:outline-none focus-ring-2 focus:ring-indigo-500 w-full' required={curState==="Sign Up" && isDataSubmitting}  />
-        </div>
-        <button className='py-3 bg-gradient-to-r from-purple-400 to-violet-600 text-white rounded-md cursor-pointer'>
-          {curState==="Sign Up" ? "Create Account"  : "Login Now"}
-        </button>
-        
-        <div className='flex items-center gap-2 text-sm text-gray-500'>
-          <input type="checkbox" />
-          <p>Agree to terms and conditions</p>
-        </div>
-        <div className='flex flex-col gap-2'>
-          {curState==="Sign Up" ? (
-            <p className='text-sm text-gray-600'>Already have an account? <span onClick={()=>{setCurrentState("Login"); setIsDataSubmitting(false)}} className='font-medium text-violet-500 cursor-pointer'>Login here</span></p>
-          ) : (
-            <p className='text-sm text-gray-600'>Don't have an account? <span onClick={()=>{setCurrentState("Sign Up"); setIsDataSubmitting(false)}} className='font-medium text-violet-500 cursor-pointer'>Sign Up here</span></p>
-          )}
-        </div>
-        </form>
+      </div>
     </div>
   )
 }
