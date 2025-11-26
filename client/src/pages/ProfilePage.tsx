@@ -48,7 +48,7 @@ const ProfilePage = () => {
               </svg>
             </button>
             
-            <div className="text-center space-y-6">
+            <div className="text-center space-y-6" >
               <div className="relative inline-block">
                 <img
                   src={
