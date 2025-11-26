@@ -3,9 +3,9 @@ import { useSocket } from "../../context/SocketContext";
 import peer from '../service/peer';
 const RoomPage = () => {
     const socket = useSocket();
-    const [myStream, setMyStream] = useState<MediaStream | null>(null);
+    const [_myStream, setMyStream] = useState<MediaStream | null>(null);
     const [remoteSocketId, setRemoteSocketId] = useState<string | null>(null);
-    const [remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
+    const [_remoteStream, setRemoteStream] = useState<MediaStream | null>(null);
     const myVideoRef = useRef<HTMLVideoElement | null>(null);
     const remoteVideoRef = useRef<HTMLVideoElement | null>(null);
 
