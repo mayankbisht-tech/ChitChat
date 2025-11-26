@@ -2,6 +2,9 @@ import React, { createContext, useEffect, useState } from "react";
 import axios from 'axios'
 import toast from "react-hot-toast";
 import { io } from "socket.io-client";
+
+axios.defaults.baseURL = import.meta.env.VITE_API_URL || "http://localhost:5000";
+
 type AuthContextType = {
     axios: typeof axios;
     token: string | null;
@@ -11,10 +14,9 @@ type AuthContextType = {
     login: (state: string, credentials: any) => Promise<void>;
     logout: () => void;
     updateProfile: (body: any) => Promise<void>;
-}; 
-const backendUrl = (import.meta as any).env?.VITE_BACKEND_URL ?? "";
+};
 export const AuthContext = createContext<AuthContextType | null>(null);
-axios.defaults.baseURL=backendUrl;
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const [token,setToken]=useState<string | null>(localStorage.getItem("token"))
     const [authUser,setAuthUser]=useState<any>(null);
@@ -85,7 +87,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     const connectSocket=(userData:any)=>{
         if(!userData||socket?.connected) return ;
-        const newSocket=io(backendUrl,{
+        const newSocket=io(import.meta.env.VITE_SOCKET_URL || "http://localhost:5000",{
             query:{
                 userId:userData._id,
             }

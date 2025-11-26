@@ -11,7 +11,7 @@ export const useSocket = () => {
 }
 
 export const SocketProvider = ({ children }: { children: React.ReactNode }) => {
-    const socket = useMemo(() => io("http://localhost:5000"), []);
+    const socket = useMemo(() => io(import.meta.env.VITE_SOCKET_URL || "http://localhost:5000"), []);
     
     return (
         <SocketContext.Provider value={socket}>
